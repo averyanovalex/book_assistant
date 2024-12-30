@@ -3,5 +3,4 @@ venv
 __pycache__
 .DS_Store
 .st
-faiss_db
 *.pdf
