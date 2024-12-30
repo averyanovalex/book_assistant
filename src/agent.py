@@ -6,7 +6,14 @@ from langchain.vectorstores import FAISS
 from utils import get_openai_llm, get_openai_embedding_model
 from dotenv import load_dotenv
 
-load_dotenv('../.env')
+import os
+import logging
+
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+load_dotenv('.env')
+logging.info('** OpenAI API key: ' + str(os.getenv("OPENAI_API_KEY")))
 
 openai_llm = get_openai_llm(run_test_question=False)
 embeddings = get_openai_embedding_model()
@@ -29,7 +36,7 @@ def create_assistant_chain():
     # Создаём промпт из шаблона
     prompt = ChatPromptTemplate.from_template(template)
 
-    db = FAISS.load_local('../data/faiss_db', embeddings=embeddings, allow_dangerous_deserialization=True)
+    db = FAISS.load_local('data/faiss_db', embeddings=embeddings, allow_dangerous_deserialization=True)
     retriever = db.as_retriever(
         search_type="similarity",
     )

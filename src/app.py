@@ -1,7 +1,7 @@
 import streamlit as st
+import agent
 
-
-
+assistant = agent.create_assistant_chain()
 
 # Пример структуры книги (реально, можно будет загрузить текст книги с номерами страниц)
 book_content = {
@@ -18,27 +18,33 @@ if "history" not in st.session_state:
 st.title("Book Assistant")
 st.caption("I can read your book and answer your questions.")
 
-# Функция поиска по тексту
+
 def generate_response(input_text):
-    response = "rrerer"
-    pages_found = [2]
+    response = assistant.invoke(input_text)
+    st.session_state.history.append((input_text, response, ""))
+
+
+# # Функция поиска по тексту
+# def generate_response(input_text):
+#     response = "rrerer"
+#     pages_found = [2]
     
-    # Поиск текста в содержимом книги
-    for page_num, page_text in book_content.items():
-        if input_text.lower() in page_text.lower():
-            response = f"{page_text}"
-            pages_found.append(page_num)
+#     # Поиск текста в содержимом книги
+#     for page_num, page_text in book_content.items():
+#         if input_text.lower() in page_text.lower():
+#             response = f"{page_text}"
+#             pages_found.append(page_num)
     
-    # Сохраняем текущий вопрос и ответ в историю
-    if pages_found:
-        answer = response
-        pages = f"Page(s): {', '.join(map(str, pages_found))}"
-    else:
-        answer = "Sorry, I couldn't find an answer to your question."
-        pages = ""
+#     # Сохраняем текущий вопрос и ответ в историю
+#     if pages_found:
+#         answer = response
+#         pages = f"Page(s): {', '.join(map(str, pages_found))}"
+#     else:
+#         answer = "Sorry, I couldn't find an answer to your question."
+#         pages = ""
     
-    # Добавляем вопрос и ответ в историю
-    st.session_state.history.append((input_text, answer, pages))
+#     # Добавляем вопрос и ответ в историю
+#     st.session_state.history.append((input_text, answer, pages))
 
 # Форм для ввода текста пользователем
 with st.form('my_form'):
@@ -57,8 +63,3 @@ for i, (question, answer, pages) in enumerate(reversed(st.session_state.history)
         # Ответ
         st.markdown("### **Answer:**")
         st.markdown(f"<div style='background-color:#e0f7fa; padding: 10px; border: 2px solid #b2ebf2; border-radius: 5px;'>{answer}</div>", unsafe_allow_html=True)
-        
-        # Номера страниц
-        if pages:
-            st.markdown("### **Pages Mentioned:**")
-            st.markdown(f"<div style='background-color:#fff3e0; padding: 10px; border: 2px solid #ffcc80; border-radius: 5px;'>{pages}</div>", unsafe_allow_html=True)
