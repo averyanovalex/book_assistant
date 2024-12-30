@@ -1,5 +1,4 @@
 import streamlit as st
-from audiorecorder import audiorecorder
 
 
 st.title("Book assistant")
@@ -14,15 +13,3 @@ with st.form('my_form'):
     submitted = st.form_submit_button('Submit')
     if submitted:
         generate_response(text)
-
-audio = audiorecorder("", "")
-
-if len(audio) > 0:
-    # To play audio in frontend:
-    st.audio(audio.export().read())  
-
-    # To save audio to a file, use pydub export method:
-    audio.export("audio.wav", format="wav")
-
-    # To get audio properties, use pydub AudioSegment properties:
-    st.write(f"Frame rate: {audio.frame_rate}, Frame width: {audio.frame_width}, Duration: {audio.duration_seconds} seconds")
