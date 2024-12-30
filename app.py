@@ -1,5 +1,8 @@
 import streamlit as st
 
+
+
+
 # Пример структуры книги (реально, можно будет загрузить текст книги с номерами страниц)
 book_content = {
     1: "This is the first page. It talks about the introduction of the book.",
