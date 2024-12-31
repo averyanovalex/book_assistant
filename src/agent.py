@@ -4,7 +4,6 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain.vectorstores import FAISS
 
 from utils import get_openai_llm, get_openai_embedding_model
-from dotenv import load_dotenv
 
 import os
 import logging
@@ -12,8 +11,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-load_dotenv('.env')
-logging.info('** OpenAI API key: ' + str(os.getenv("OPENAI_API_KEY")))
+logging.info('** OpenAI API key loaded: ' + str(os.getenv("OPENAI_API_KEY")[:5])+ '...' + str(os.getenv("OPENAI_API_KEY")[-5:]))
 
 openai_llm = get_openai_llm(run_test_question=False)
 embeddings = get_openai_embedding_model()

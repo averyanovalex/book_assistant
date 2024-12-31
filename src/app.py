@@ -1,15 +1,13 @@
 import streamlit as st
 import agent
+import logging
+import os
 
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 assistant = agent.create_assistant_chain()
 
-# Пример структуры книги (реально, можно будет загрузить текст книги с номерами страниц)
-book_content = {
-    1: "This is the first page. It talks about the introduction of the book.",
-    2: "This is the second page. It discusses the main character.",
-    3: "This is the third page. It talks about the setting of the story.",
-    # Добавить остальные страницы по аналогии...
-}
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 # Список для хранения истории переписки
 if "history" not in st.session_state:
@@ -22,29 +20,6 @@ st.caption("I can read your book and answer your questions.")
 def generate_response(input_text):
     response = assistant.invoke(input_text)
     st.session_state.history.append((input_text, response, ""))
-
-
-# # Функция поиска по тексту
-# def generate_response(input_text):
-#     response = "rrerer"
-#     pages_found = [2]
-    
-#     # Поиск текста в содержимом книги
-#     for page_num, page_text in book_content.items():
-#         if input_text.lower() in page_text.lower():
-#             response = f"{page_text}"
-#             pages_found.append(page_num)
-    
-#     # Сохраняем текущий вопрос и ответ в историю
-#     if pages_found:
-#         answer = response
-#         pages = f"Page(s): {', '.join(map(str, pages_found))}"
-#     else:
-#         answer = "Sorry, I couldn't find an answer to your question."
-#         pages = ""
-    
-#     # Добавляем вопрос и ответ в историю
-#     st.session_state.history.append((input_text, answer, pages))
 
 # Форм для ввода текста пользователем
 with st.form('my_form'):
