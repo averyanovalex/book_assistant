@@ -69,7 +69,7 @@
                             {{ book.title }}
                         </a>
                         <form action="{{ url_for('delete_book', book_title=book.title) }}" method="POST">
-                            <button type="submit" class="p-1 text-red-500 hover:text-red-700">
+                            <button type="submit" class="p-1 text-red-500 hover:text-red-700" onclick="return confirm('Вы уверены, что хотите удалить книгу?');">
                                 <i data-lucide="trash-2"></i>
                             </button>
                         </form>

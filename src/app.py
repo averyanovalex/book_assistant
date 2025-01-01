@@ -3,9 +3,11 @@ from werkzeug.utils import secure_filename
 import os
 import shutil
 from init_books import format_book_title, initialize_books_structure, get_all_books
+from books import BookOperations
 
 app = Flask(__name__)
 app.config['BOOKS_FOLDER'] = 'books'
+book_ops = BookOperations(app.config['BOOKS_FOLDER'])
 
 class Book:
     def __init__(self, title):
@@ -54,9 +56,12 @@ def upload_book():
 
 @app.route('/delete_book/<path:book_title>', methods=['POST'])
 def delete_book(book_title):
-    book = Book(book_title)
-    if os.path.exists(book.path):
-        shutil.rmtree(book.path)  # Используем rmtree для удаления папки и всего её содержимого
+    success, message = book_ops.delete_book(book_title)
+    print(message)  # Логируем результат операции
+    
+    if not success:
+        return message, 500
+        
     return redirect(url_for('home'))
 
 @app.route('/api/chat', methods=['POST'])
