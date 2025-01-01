@@ -1,63 +1,80 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="flex flex-col h-full">
-    <h1 class="text-2xl font-semibold mb-4 flex items-center">
-        <i data-lucide="bot" class="mr-2 text-blue-500"></i>
-        Chat about: {{ book.title }}
-    </h1>
-    <div id="chat-messages" class="flex-1 overflow-y-auto mb-4 bg-gray-50 rounded-lg p-4">
-        <!-- Chat messages will be appended here -->
+<div class="h-full flex flex-col">
+    <div class="mb-4">
+        <h1 class="text-2xl font-bold">{{ book.title }}</h1>
     </div>
-    <form id="chat-form" class="flex items-center">
-        <input type="text" id="user-input" class="flex-grow mr-2 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ask a question about '{{ book.title }}'...">
-        <button type="submit" class="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <i data-lucide="send"></i>
+    
+    <div class="flex-grow bg-gray-50 rounded-lg p-4 mb-4 overflow-y-auto">
+        <div id="chat-messages" class="space-y-4">
+            <!-- Messages will appear here -->
+        </div>
+    </div>
+    
+    <div class="flex space-x-4">
+        <input type="text" id="message-input"
+               class="flex-grow rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+               placeholder="Type your message...">
+        <button onclick="sendMessage()"
+                class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+            Send
         </button>
-    </form>
+    </div>
 </div>
 
 <script>
-document.getElementById('chat-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const userInput = document.getElementById('user-input');
-    const message = userInput.value.trim();
+function sendMessage() {
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+    
     if (message) {
-        appendMessage('user', message);
-        userInput.value = '';
-
         fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ message: message }),
+            body: JSON.stringify({ message: message })
         })
         .then(response => response.json())
         .then(data => {
-            appendMessage('assistant', data.response);
+            const messagesDiv = document.getElementById('chat-messages');
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'flex justify-end';
+            userMessage.innerHTML = `
+                <div class="bg-blue-500 text-white rounded-lg px-4 py-2 max-w-md">
+                    ${message}
+                </div>
+            `;
+            messagesDiv.appendChild(userMessage);
+            
+            // Add assistant response
+            const assistantMessage = document.createElement('div');
+            assistantMessage.className = 'flex justify-start';
+            assistantMessage.innerHTML = `
+                <div class="bg-gray-200 rounded-lg px-4 py-2 max-w-md">
+                    ${data.response}
+                </div>
+            `;
+            messagesDiv.appendChild(assistantMessage);
+            
+            // Clear input
+            input.value = '';
+            
+            // Scroll to bottom
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
     }
-});
-
-function appendMessage(role, content) {
-    const chatMessages = document.getElementById('chat-messages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `mb-4 flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
-    messageDiv.innerHTML = `
-        <div class="flex items-start ${role === 'user' ? 'flex-row-reverse' : ''} gap-3">
-            <div class="p-2 rounded-full ${role === 'user' ? 'bg-blue-500' : 'bg-gray-300'} mr-2">
-                <i data-lucide="${role === 'user' ? 'user' : 'bot'}" class="${role === 'user' ? 'text-white' : 'text-gray-700'}"></i>
-            </div>
-            <span class="inline-block p-3 rounded-lg ${role === 'user' ? 'bg-blue-500 text-white' : 'bg-white border border-gray-300'}">
-                ${content}
-            </span>
-        </div>
-    `;
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    lucide.createIcons();
 }
+
+// Allow sending message with Enter key
+document.getElementById('message-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
 </script>
 {% endblock %}
 

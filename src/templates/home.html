@@ -1,8 +1,37 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="flex flex-col items-center justify-center h-full">
-    <h1 class="text-3xl font-bold mb-6">Welcome to Book Assistant</h1>
-    <p class="text-xl text-gray-600">Select a book from the sidebar to start chatting, or upload a new book.</p>
+<div class="max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8">Welcome to Book Assistant</h1>
+    
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i data-lucide="info" class="h-5 w-5 text-blue-500"></i>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-blue-700">
+                    Select a book from the sidebar to start chatting about it.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    {% if not books %}
+    <div class="text-center py-12">
+        <i data-lucide="book" class="mx-auto h-12 w-12 text-gray-400"></i>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No books</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by uploading a book.</p>
+        <div class="mt-6">
+            <button hx-post="/upload_book"
+                    hx-trigger="click"
+                    hx-target="#upload-modal"
+                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600">
+                <i data-lucide="upload" class="mr-2 h-5 w-5"></i>
+                Upload Book
+            </button>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

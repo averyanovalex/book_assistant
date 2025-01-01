@@ -2,66 +2,26 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 from werkzeug.utils import secure_filename
 import os
 import shutil
+from init_books import format_book_title, initialize_books_structure, get_all_books
 
 app = Flask(__name__)
 app.config['BOOKS_FOLDER'] = 'books'
 
-def format_book_title(filename):
-    """Преобразует имя файла в читаемое название книги"""
-    # Убираем расширение файла, если оно есть
-    title = os.path.splitext(filename)[0]
-    # Заменяем подчеркивания на пробелы
-    return title.replace('_', ' ')
-
 class Book:
     def __init__(self, title):
-        self.raw_title = title  # Оригинальное имя файла
-        self.title = format_book_title(title)  # Отформатированное название для отображения
+        self.raw_title = title
+        self.title = format_book_title(title)
         self.id = hash(title)
         self.path = os.path.join(app.config['BOOKS_FOLDER'], title)
 
-def ensure_books_folder():
-    if not os.path.exists(app.config['BOOKS_FOLDER']):
-        os.makedirs(app.config['BOOKS_FOLDER'])
-
-def add_sample_books():
-    sample_books = [
-        "Pride and Prejudice",
-        "The Great Gatsby",
-        "To Kill a Mockingbird",
-        "1984",
-        "The Catcher in the Rye"
-    ]
-    
-    for title in sample_books:
-        # Заменяем пробелы на подчеркивания для имени файла
-        safe_title = secure_filename(title.replace(' ', '_'))
-        book_path = os.path.join(app.config['BOOKS_FOLDER'], safe_title)
-        if not os.path.exists(book_path):
-            os.makedirs(book_path)  # Создаем папку вместо файла
-            print(f"Created book directory: {book_path}")
-
-def get_all_books():
-    books = []
-    if os.path.exists(app.config['BOOKS_FOLDER']):
-        print(f"Books folder exists at {app.config['BOOKS_FOLDER']}")
-        for book_name in os.listdir(app.config['BOOKS_FOLDER']):
-            # Проверяем, что это директория
-            if os.path.isdir(os.path.join(app.config['BOOKS_FOLDER'], book_name)):
-                book = Book(book_name)
-                books.append(book)
-                print(f"Added book: {book_name}")
-    print(f"Total books found: {len(books)}")
-    return books
-
 @app.route('/')
 def home():
-    books = get_all_books()
+    books = get_all_books(app.config['BOOKS_FOLDER'])
     return render_template('home.html', books=books)
 
 @app.route('/chat/<path:book_title>')
 def chat(book_title):
-    books = get_all_books()
+    books = get_all_books(app.config['BOOKS_FOLDER'])
     book = Book(book_title)
     return render_template('chat.html', books=books, book=book)
 
@@ -106,7 +66,6 @@ def api_chat():
     return jsonify({'response': f"This is a response to: {user_message}"})
 
 if __name__ == '__main__':
-    ensure_books_folder()
-    add_sample_books()
+    initialize_books_structure(app.config['BOOKS_FOLDER'])
     app.run(debug=True)
 
