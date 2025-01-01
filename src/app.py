@@ -36,23 +36,13 @@ def upload_book():
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     
-    if file and file.filename.split('.')[-1].lower() in ['txt', 'fb2']:
-        title = request.form['title']
-        # Заменяем пробелы на подчеркивания для имени файла
-        safe_title = secure_filename(title.replace(' ', '_'))
-        book = Book(safe_title)
-        
-        # Создаем папку для книги, если её нет
-        if not os.path.exists(book.path):
-            os.makedirs(book.path)
-            
-        # Сохраняем файл в папку книги
-        file_path = os.path.join(book.path, secure_filename(file.filename))
-        file.save(file_path)
-        
-        return jsonify({'success': True, 'book_id': book.id}), 200
+    title = request.form['title']
+    success, message, book_id = book_ops.add_book(title, file)
+    
+    if success:
+        return jsonify({'success': True, 'book_id': book_id}), 200
     else:
-        return jsonify({'error': 'Unsupported file format. Please upload TXT or FB2 files.'}), 400
+        return jsonify({'error': message}), 400
 
 @app.route('/delete_book/<path:book_title>', methods=['POST'])
 def delete_book(book_title):

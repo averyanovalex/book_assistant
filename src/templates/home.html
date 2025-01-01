@@ -23,9 +23,7 @@
         <h3 class="mt-2 text-sm font-medium text-gray-900">No books</h3>
         <p class="mt-1 text-sm text-gray-500">Get started by uploading a book.</p>
         <div class="mt-6">
-            <button hx-post="/upload_book"
-                    hx-trigger="click"
-                    hx-target="#upload-modal"
+            <button onclick="showUploadForm()"
                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600">
                 <i data-lucide="upload" class="mr-2 h-5 w-5"></i>
                 Upload Book
