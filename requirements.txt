@@ -1,6 +1,11 @@
 streamlit==1.41.1
+streamlit-option-menu
 watchdog==6.0.0
 langchain==0.3.13
 langchain_openai==0.2.14
 langchain_community==0.3.13
 faiss-cpu==1.9.0.post1
+# ---
+Flask==2.3.2
+Flask-SQLAlchemy==3.0.3
+Werkzeug==2.3.6

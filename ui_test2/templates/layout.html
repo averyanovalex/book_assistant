@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <aside class="bg-white w-64 h-screen overflow-y-auto p-4">
+    <nav>
+        <a href="/" class="flex items-center space-x-2 mb-8">
+            <i data-lucide="book" class="text-blue-500"></i>
+            <span class="text-xl font-bold">Book Assistant</span>
+        </a>
+        <button hx-post="/upload_book"
+                hx-trigger="click"
+                hx-target="#upload-modal"
+                class="w-full flex items-center justify-center space-x-2 mb-2 p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+            <i data-lucide="upload"></i>
+            <span>Upload Book</span>
+        </button>
+        <p class="text-xs text-gray-500 mb-4">Supported formats: TXT, FB2</p>
+        <h2 class="text-lg font-semibold mb-2 flex items-center">
+            <i data-lucide="book-open" class="mr-2 text-blue-500"></i>
+            Your Books
+        </h2>
+        <ul class="space-y-2">
+            {% for book in books %}
+            <li class="flex items-center justify-between">
+                <a href="{{ url_for('chat', book_id=book.id) }}" 
+                   class="flex-grow flex items-center p-2 rounded-md hover:bg-gray-100">
+                    <i data-lucide="chevron-right" class="mr-2 text-blue-500"></i>
+                    {{ book.title }}
+                </a>
+                <form action="{{ url_for('delete_book', book_id=book.id) }}" method="POST">
+                    <button type="submit" class="p-1 text-red-500 hover:text-red-700">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    </nav>
+</aside>
+        <main class="flex-1 overflow-y-auto p-8">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <div id="upload-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <!-- Upload form will be loaded here -->
+    </div>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
+
