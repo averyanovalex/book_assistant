@@ -66,6 +66,5 @@ def api_chat():
     return jsonify({'response': f"This is a response to: {user_message}"})
 
 if __name__ == '__main__':
-    initialize_books_structure(app.config['BOOKS_FOLDER'])
     app.run(debug=True)
 
