@@ -2,11 +2,14 @@ from langchain.schema import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain.vectorstores import FAISS
+from dotenv import load_dotenv
 
 from utils import get_openai_llm, get_openai_embedding_model
 
 import os
 import logging
+
+load_dotenv()
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -19,7 +22,7 @@ embeddings = get_openai_embedding_model()
 
 
 
-def create_assistant_chain():
+def create_assistant_chain(path: str):
 
     # Создаём простой шаблон
     template = """
@@ -34,7 +37,7 @@ def create_assistant_chain():
     # Создаём промпт из шаблона
     prompt = ChatPromptTemplate.from_template(template)
 
-    db = FAISS.load_local('data/faiss_db', embeddings=embeddings, allow_dangerous_deserialization=True)
+    db = FAISS.load_local(f'{path}/faiss_db', embeddings=embeddings, allow_dangerous_deserialization=True)
     retriever = db.as_retriever(
         search_type="similarity",
     )
