@@ -63,12 +63,12 @@
                 <ul class="space-y-2">
                     {% for book in books %}
                     <li class="flex items-center justify-between">
-                        <a href="{{ url_for('chat', book_id=book.id) }}" 
+                        <a href="{{ url_for('chat', book_title=book.title) }}" 
                            class="flex-grow flex items-center p-2 rounded-md hover:bg-gray-100">
                             <i data-lucide="chevron-right" class="mr-2 text-blue-500"></i>
                             {{ book.title }}
                         </a>
-                        <form action="{{ url_for('delete_book', book_id=book.id) }}" method="POST">
+                        <form action="{{ url_for('delete_book', book_title=book.title) }}" method="POST">
                             <button type="submit" class="p-1 text-red-500 hover:text-red-700">
                                 <i data-lucide="trash-2"></i>
                             </button>
@@ -101,6 +101,13 @@
         
         let isResizing = false;
 
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedWidth = localStorage.getItem('sidebarWidth');
+            if (savedWidth) {
+                sidebar.style.width = savedWidth;
+            }
+        });
+
         splitter.addEventListener('mousedown', (e) => {
             isResizing = true;
             document.body.style.cursor = 'ew-resize';
@@ -114,6 +121,7 @@
 
             if (newWidth >= minWidth && newWidth <= maxWidth) {
                 sidebar.style.width = `${newWidth}px`;
+                localStorage.setItem('sidebarWidth', `${newWidth}px`);
             }
         });
 

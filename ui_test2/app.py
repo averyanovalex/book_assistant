@@ -1,83 +1,112 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
+import shutil
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///books.db'
-app.config['UPLOAD_FOLDER'] = 'uploads'
-db = SQLAlchemy(app)
+app.config['BOOKS_FOLDER'] = 'books'
 
-class Book(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    file_path = db.Column(db.String(200), nullable=False)
+def format_book_title(filename):
+    """Преобразует имя файла в читаемое название книги"""
+    # Убираем расширение файла, если оно есть
+    title = os.path.splitext(filename)[0]
+    # Заменяем подчеркивания на пробелы
+    return title.replace('_', ' ')
+
+class Book:
+    def __init__(self, title):
+        self.raw_title = title  # Оригинальное имя файла
+        self.title = format_book_title(title)  # Отформатированное название для отображения
+        self.id = hash(title)
+        self.path = os.path.join(app.config['BOOKS_FOLDER'], title)
+
+def ensure_books_folder():
+    if not os.path.exists(app.config['BOOKS_FOLDER']):
+        os.makedirs(app.config['BOOKS_FOLDER'])
 
 def add_sample_books():
     sample_books = [
-        {"title": "Pride and Prejudice", "file_path": "uploads/pride_and_prejudice.epub"},
-        {"title": "The Great Gatsby", "file_path": "uploads/the_great_gatsby.pdf"},
-        {"title": "To Kill a Mockingbird", "file_path": "uploads/to_kill_a_mockingbird.epub"},
-        {"title": "1984", "file_path": "uploads/1984.pdf"},
-        {"title": "The Catcher in the Rye", "file_path": "uploads/the_catcher_in_the_rye.epub"},
+        "Pride and Prejudice",
+        "The Great Gatsby",
+        "To Kill a Mockingbird",
+        "1984",
+        "The Catcher in the Rye"
     ]
     
-    for book in sample_books:
-        if not Book.query.filter_by(title=book["title"]).first():
-            new_book = Book(title=book["title"], file_path=book["file_path"])
-            db.session.add(new_book)
-    
-    db.session.commit()
+    for title in sample_books:
+        # Заменяем пробелы на подчеркивания для имени файла
+        safe_title = secure_filename(title.replace(' ', '_'))
+        book_path = os.path.join(app.config['BOOKS_FOLDER'], safe_title)
+        if not os.path.exists(book_path):
+            os.makedirs(book_path)  # Создаем папку вместо файла
+            print(f"Created book directory: {book_path}")
 
 def get_all_books():
-    return Book.query.all()
+    books = []
+    if os.path.exists(app.config['BOOKS_FOLDER']):
+        print(f"Books folder exists at {app.config['BOOKS_FOLDER']}")
+        for book_name in os.listdir(app.config['BOOKS_FOLDER']):
+            # Проверяем, что это директория
+            if os.path.isdir(os.path.join(app.config['BOOKS_FOLDER'], book_name)):
+                book = Book(book_name)
+                books.append(book)
+                print(f"Added book: {book_name}")
+    print(f"Total books found: {len(books)}")
+    return books
 
 @app.route('/')
 def home():
     books = get_all_books()
     return render_template('home.html', books=books)
 
-@app.route('/chat/<int:book_id>')
-def chat(book_id):
+@app.route('/chat/<path:book_title>')
+def chat(book_title):
     books = get_all_books()
-    book = Book.query.get_or_404(book_id)
+    book = Book(book_title)
     return render_template('chat.html', books=books, book=book)
 
 @app.route('/upload_book', methods=['POST'])
 def upload_book():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
+    
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
+    
     if file and file.filename.split('.')[-1].lower() in ['txt', 'fb2']:
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        title = request.form['title']
+        # Заменяем пробелы на подчеркивания для имени файла
+        safe_title = secure_filename(title.replace(' ', '_'))
+        book = Book(safe_title)
+        
+        # Создаем папку для книги, если её нет
+        if not os.path.exists(book.path):
+            os.makedirs(book.path)
+            
+        # Сохраняем файл в папку книги
+        file_path = os.path.join(book.path, secure_filename(file.filename))
         file.save(file_path)
-        new_book = Book(title=request.form['title'], file_path=file_path)
-        db.session.add(new_book)
-        db.session.commit()
-        return jsonify({'success': True, 'book_id': new_book.id}), 200
+        
+        return jsonify({'success': True, 'book_id': book.id}), 200
     else:
         return jsonify({'error': 'Unsupported file format. Please upload TXT or FB2 files.'}), 400
 
-@app.route('/delete_book/<int:book_id>', methods=['POST'])
-def delete_book(book_id):
-    book = Book.query.get_or_404(book_id)
-    os.remove(book.file_path)
-    db.session.delete(book)
-    db.session.commit()
+@app.route('/delete_book/<path:book_title>', methods=['POST'])
+def delete_book(book_title):
+    book = Book(book_title)
+    if os.path.exists(book.path):
+        shutil.rmtree(book.path)  # Используем rmtree для удаления папки и всего её содержимого
     return redirect(url_for('home'))
 
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
-    # This is a mock response. In a real application, you'd process the message and generate a response.
+    # Это заглушка. В реальном приложении здесь будет обработка сообщения и генерация ответа.
     user_message = request.json['message']
     return jsonify({'response': f"This is a response to: {user_message}"})
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        add_sample_books()
+    ensure_books_folder()
+    add_sample_books()
     app.run(debug=True)
 
