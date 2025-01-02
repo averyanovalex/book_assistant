@@ -3,6 +3,7 @@ import shutil
 from werkzeug.utils import secure_filename
 import logging
 from werkzeug.datastructures import FileStorage
+from transliterate import translit
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -29,14 +30,19 @@ class BookOperations:
             if not self._is_supported_format(file.filename):
                 return False, f"Неподдерживаемый формат. Поддерживаются: {', '.join(self.SUPPORTED_FORMATS)}", None
             
+            # Транслитерируем русское название в латиницу
+            try:
+                safe_title = translit(title, 'ru', reversed=True)
+            except:
+                safe_title = title
+            
             # Подготавливаем название книги
-            safe_title = secure_filename(title.replace(' ', '_'))
+            safe_title = secure_filename(safe_title.replace(' ', '_'))
             book_path = os.path.join(self.books_folder, safe_title)
             
             # Создаем папку для книги
             if not os.path.exists(book_path):
                 os.makedirs(book_path)
-                # return True, f"Успешно создана папка для книги: {title}", str(hash(safe_title))
             else:
                 return False, f"Книга с таким названием уже существует: {title}", None
             
@@ -66,18 +72,25 @@ class BookOperations:
             tuple: (bool, str) - (успех операции, сообщение)
         """
         try:
-            # Преобразуем название книги, заменяя пробелы на подчеркивания
-            safe_title = book_title.replace(' ', '_')
+            # Транслитерируем русское название в латиницу
+            from transliterate import translit
+            try:
+                safe_title = translit(book_title, 'ru', reversed=True)
+            except:
+                safe_title = book_title
+            
+            # Преобразуем название книги
+            safe_title = secure_filename(safe_title.replace(' ', '_'))
             book_path = os.path.join(self.books_folder, safe_title)
             
             if os.path.exists(book_path):
                 shutil.rmtree(book_path)  # Удаляем папку и всё её содержимое
-                return True, f"Successfully deleted book: {book_title}"
+                return True, f"Книга успешно удалена: {book_title}"
             else:
-                return False, f"Book directory not found: {book_path}"
+                return False, f"Папка книги не найдена: {book_path}"
                 
         except Exception as e:
-            return False, f"Error deleting book: {str(e)}" 
+            return False, f"Ошибка при удалении книги: {str(e)}"
         
 
     def _vectorize_book(self, dir_path, filename):

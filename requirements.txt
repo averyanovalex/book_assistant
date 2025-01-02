@@ -5,3 +5,4 @@ faiss-cpu==1.9.0.post1
 Flask==2.3.2
 Werkzeug==2.3.6
 pypdf==5.1.0
+transliterate==1.10.2
