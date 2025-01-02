@@ -4,3 +4,4 @@ langchain_community==0.3.13
 faiss-cpu==1.9.0.post1
 Flask==2.3.2
 Werkzeug==2.3.6
+pypdf==5.1.0

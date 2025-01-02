@@ -50,8 +50,12 @@ def create_assistant_chain(path: str):
     # Объявляем функцию, которая будет собирать строку из полученных документов
     def format_docs(docs):
         context = "\n\n".join([d.page_content for d in docs])
-        pages = ','.join(sorted(str(d.metadata['page']) for d in docs))
-        return f"{context}\n\nPages: {pages}"
+        if 'page' in docs[0].metadata:
+            pages = ','.join(sorted(str(d.metadata['page']) for d in docs))
+            result = f"{context}\n\nPages: {pages}"
+        else:
+            result = context
+        return result
 
 
     # Создаём цепочку
