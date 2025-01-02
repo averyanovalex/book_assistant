@@ -37,6 +37,33 @@
             height: 100%; /* Full height for the main content */
             overflow-y: auto;
         }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -100,7 +127,14 @@
                   hx-post="/upload_book"
                   hx-encoding="multipart/form-data"
                   hx-target="#upload-result"
-                  class="space-y-4">
+                  class="space-y-4 relative">
+                
+                <div class="loading-overlay" id="loading-overlay">
+                    <div class="text-center">
+                        <div class="spinner mb-2"></div>
+                        <div class="text-blue-600">Загрузка книги...</div>
+                    </div>
+                </div>
                 
                 <div>
                     <label for="title" class="block text-sm font-medium text-gray-700">Book Title</label>
@@ -188,12 +222,16 @@
             document.getElementById('upload-result').innerHTML = '';
         }
 
-        // Обработка успешной загрузки
+        document.getElementById('upload-form').addEventListener('htmx:beforeRequest', function(event) {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        });
+
         document.getElementById('upload-form').addEventListener('htmx:afterRequest', function(event) {
+            document.getElementById('loading-overlay').style.display = 'none';
             const response = JSON.parse(event.detail.xhr.response);
             if (response.success) {
                 closeUploadModal();
-                window.location.reload(); // Перезагружаем страницу для отображения новой книги
+                window.location.reload();
             } else {
                 document.getElementById('upload-result').innerHTML = 
                     `<div class="text-red-500">${response.error}</div>`;
