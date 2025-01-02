@@ -6,6 +6,7 @@ from init_books import format_book_title, initialize_books_structure, get_all_bo
 from books import BookOperations
 from agent import create_assistant_chain
 import logging
+from collections import defaultdict
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -14,6 +15,8 @@ agent = None
 app = Flask(__name__)
 app.config['BOOKS_FOLDER'] = 'books'
 book_ops = BookOperations(app.config['BOOKS_FOLDER'])
+
+chat_histories = defaultdict(list)
 
 class Book:
     def __init__(self, title):
@@ -41,7 +44,9 @@ def chat(book_title):
         logging.error(f"* Error creating agent: {str(e)}")
         return render_template('error.html', error=f"Failed to load book: {str(e)}"), 500
 
-    return render_template('chat.html', books=books, book=book)
+    # Получаем историю чата для этой книги
+    book_chat_history = chat_histories[book_title]
+    return render_template('chat.html', books=books, book=book, chat_history=book_chat_history)
 
 @app.route('/upload_book', methods=['POST'])
 def upload_book():
@@ -74,6 +79,7 @@ def api_chat():
     global agent
 
     user_message = request.json['message']
+    book_title = request.json['book_title']
     logging.info(f"* User message: {user_message}")
 
     if agent is None:
@@ -83,6 +89,17 @@ def api_chat():
     try:
         response = agent.invoke(user_message)
         logging.info(f"* Response: {response}")
+        
+        # Сохраняем сообщения в историю
+        chat_histories[book_title].append({
+            'type': 'user',
+            'content': user_message
+        })
+        chat_histories[book_title].append({
+            'type': 'assistant',
+            'content': response
+        })
+        
         return jsonify({'response': response})
     except Exception as e:
         logging.error(f"* Chat error: {str(e)}")
