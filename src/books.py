@@ -7,6 +7,38 @@ from transliterate import translit
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+def format_book_title(filename):
+    """Преобразует имя файла в читаемое название книги"""
+    title = os.path.splitext(filename)[0]
+    return title.replace('fdfdf_', ' ')
+
+def ensure_books_folder(books_folder):
+    """Создает папку для книг, если она не существует"""
+    if not os.path.exists(books_folder):
+        os.makedirs(books_folder)
+        print(f"Created books folder: {books_folder}")
+
+def get_all_books(books_folder):
+    """Получает список всех книг из указанной папки"""
+    books = []
+    if os.path.exists(books_folder):
+        print(f"Books folder exists at {books_folder}")
+        for book_name in os.listdir(books_folder):
+            if os.path.isdir(os.path.join(books_folder, book_name)):
+                # from app import Book  # Импортируем здесь во избежание циклических импортов
+                book = Book(book_name)
+                books.append(book)
+                print(f"Added book: {book_name}")
+    print(f"Total books found: {len(books)}")
+    return books
+
+class Book:
+    def __init__(self, title):
+        self.raw_title = title
+        self.title = format_book_title(title)
+        self.id = hash(title)
+        self.path = os.path.join('books', title)
+
 class BookOperations:
     # Определяем поддерживаемые форматы как атрибут класса
     SUPPORTED_FORMATS = ['txt', 'fb2', 'pdf']

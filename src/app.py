@@ -2,11 +2,12 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, g
 from werkzeug.utils import secure_filename
 import os
 import shutil
-from init_books import format_book_title, initialize_books_structure, get_all_books
+from books import format_book_title, get_all_books
 from books import BookOperations
 from agent import create_assistant_chain
 import logging
 from collections import defaultdict
+from books import Book
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -18,12 +19,7 @@ book_ops = BookOperations(app.config['BOOKS_FOLDER'])
 
 chat_histories = defaultdict(list)
 
-class Book:
-    def __init__(self, title):
-        self.raw_title = title
-        self.title = format_book_title(title)
-        self.id = hash(title)
-        self.path = os.path.join(app.config['BOOKS_FOLDER'], title)
+
 
 @app.route('/')
 def home():
