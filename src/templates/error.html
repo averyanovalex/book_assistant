@@ -1,0 +1,8 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="error-container">
+    <h2>Error</h2>
+    <p>{{ error }}</p>
+    <a href="{{ url_for('home') }}" class="btn btn-primary">Return to Home</a>
+</div>
+{% endblock %} 

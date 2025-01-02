@@ -34,10 +34,14 @@ def create_assistant_chain(path: str):
 
     Question: {question}
     """
+    if not os.path.exists(path):
+        logging.error(f'* Database not found: {path}')
+        return None
+
     # Создаём промпт из шаблона
     prompt = ChatPromptTemplate.from_template(template)
 
-    db = FAISS.load_local(f'{path}/faiss_db', embeddings=embeddings, allow_dangerous_deserialization=True)
+    db = FAISS.load_local(path, embeddings=embeddings, allow_dangerous_deserialization=True)
     retriever = db.as_retriever(
         search_type="similarity",
     )
