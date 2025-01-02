@@ -7,6 +7,11 @@
     </div>
     
     <div class="flex-grow bg-gray-50 rounded-lg p-4 mb-4 overflow-y-auto">
+        <div id="loading-indicator" class="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <div class="loading-text">Получение ответа...</div>
+        </div>
+        
         <div id="chat-messages" class="space-y-4">
             <!-- Messages will appear here -->
         </div>
@@ -24,57 +29,114 @@
 </div>
 
 <script>
-function sendMessage() {
-    const input = document.getElementById('message-input');
-    const message = input.value.trim();
-    
-    if (message) {
-        fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ message: message })
-        })
-        .then(response => response.json())
-        .then(data => {
-            const messagesDiv = document.getElementById('chat-messages');
-            
-            // Add user message
-            const userMessage = document.createElement('div');
-            userMessage.className = 'flex justify-end';
-            userMessage.innerHTML = `
-                <div class="bg-blue-500 text-white rounded-lg px-4 py-2 max-w-md">
-                    ${message}
-                </div>
-            `;
-            messagesDiv.appendChild(userMessage);
-            
-            // Add assistant response
-            const assistantMessage = document.createElement('div');
-            assistantMessage.className = 'flex justify-start';
-            assistantMessage.innerHTML = `
-                <div class="bg-gray-200 rounded-lg px-4 py-2 max-w-md">
-                    ${data.response}
-                </div>
-            `;
-            messagesDiv.appendChild(assistantMessage);
-            
-            // Clear input
-            input.value = '';
-            
-            // Scroll to bottom
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        });
+    function appendMessage(type, content) {
+        const messagesDiv = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        
+        switch(type) {
+            case 'user':
+                messageDiv.className = 'flex justify-end';
+                messageDiv.innerHTML = `
+                    <div class="bg-blue-500 text-white rounded-lg px-4 py-2 max-w-md">
+                        ${content}
+                    </div>
+                `;
+                break;
+            case 'assistant':
+                messageDiv.className = 'flex justify-start';
+                messageDiv.innerHTML = `
+                    <div class="bg-gray-200 rounded-lg px-4 py-2 max-w-md">
+                        ${content}
+                    </div>
+                `;
+                break;
+            case 'error':
+                messageDiv.className = 'flex justify-start';
+                messageDiv.innerHTML = `
+                    <div class="bg-red-100 text-red-700 rounded-lg px-4 py-2 max-w-md">
+                        ${content}
+                    </div>
+                `;
+                break;
+        }
+        
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
-}
 
-// Allow sending message with Enter key
-document.getElementById('message-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        sendMessage();
+    async function sendMessage() {
+        const messageInput = document.getElementById('message-input');
+        const message = messageInput.value.trim();
+        
+        if (message) {
+            // Показываем индикатор загрузки
+            document.getElementById('loading-indicator').style.display = 'flex';
+            
+            // Добавляем сообщение пользователя
+            appendMessage('user', message);
+            messageInput.value = '';
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message }),
+                });
+
+                const data = await response.json();
+                
+                // Скрываем индикатор загрузки
+                document.getElementById('loading-indicator').style.display = 'none';
+
+                if (data.error) {
+                    appendMessage('error', `Ошибка: ${data.error}`);
+                } else {
+                    appendMessage('assistant', data.response);
+                }
+            } catch (error) {
+                // Скрываем индикатор загрузки в случае ошибки
+                document.getElementById('loading-indicator').style.display = 'none';
+                appendMessage('error', 'Произошла ошибка при отправке сообщения');
+            }
+        }
     }
-});
+
+    // Allow sending message with Enter key
+    document.getElementById('message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
 </script>
+
+<style>
+    .loading-indicator {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px 0;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+        margin-top: 10px;
+        color: #666;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
 {% endblock %}
 
