@@ -45,7 +45,7 @@ class Book:
 
 class BookOperations:
     # Определяем поддерживаемые форматы как атрибут класса
-    SUPPORTED_FORMATS = ['txt', 'fb2', 'pdf']
+    SUPPORTED_FORMATS = ['txt', 'pdf']
     
     def __init__(self, books_folder):
         self.books_folder = books_folder
@@ -143,7 +143,7 @@ class BookOperations:
         file_extension = filename.split('.')[-1].lower()
 
         # Выбираем загрузчик в зависимости от расширения
-        if file_extension in ['txt', 'fb2']:
+        if file_extension =='txt':
             loader = TextLoader(file_path)
         elif file_extension == 'pdf':
             loader = PyPDFLoader(file_path)
