@@ -1,7 +1,6 @@
 import logging
 import os
 
-from dotenv import load_dotenv
 from langchain.schema import StrOutputParser
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
@@ -9,18 +8,11 @@ from langchain_core.runnables import RunnablePassthrough
 
 from utils import get_openai_embedding_model, get_openai_llm
 
-load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-logging.info(
-    "** OpenAI API key loaded: "
-    + str(os.getenv("OPENAI_API_KEY")[:5])
-    + "..."
-    + str(os.getenv("OPENAI_API_KEY")[-5:])
-)
 
 openai_llm = get_openai_llm(run_test_question=False)
 embeddings = get_openai_embedding_model()

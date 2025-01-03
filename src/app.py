@@ -1,13 +1,30 @@
 import logging
 from collections import defaultdict
 
+from dotenv import load_dotenv
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 from agent import create_assistant_chain
 from books import Book, BookOperations, get_all_books
+import os
+
+load_dotenv("../.env")
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+logging.info(
+    "** OpenAI API key loaded: "
+    + str(os.getenv("OPENAI_API_KEY")[:5])
+    + "..."
+    + str(os.getenv("OPENAI_API_KEY")[-5:])
+)
+logging.info(
+    "** Proxy URL loaded: "
+    + str(os.getenv("PROXY_URL")[:5])
+    + "..."
+    + str(os.getenv("PROXY_URL")[-5:])
 )
 
 agent = None
