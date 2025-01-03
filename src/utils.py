@@ -64,7 +64,7 @@ def get_openai_llm(model='gpt-4o-mini', run_test_question=False):
 
 
 def get_openai_embedding_model(model='text-embedding-ada-002'):
-    from langchain_community.embeddings import OpenAIEmbeddings
+    from langchain_openai.embeddings import OpenAIEmbeddings
 
     check_not_russian_ip(verbose=False)
 

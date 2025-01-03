@@ -129,7 +129,7 @@ class BookOperations:
         """Векторизует книгу"""
         from langchain_community.document_loaders import TextLoader, PyPDFLoader
         from langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter
-        from langchain.vectorstores import FAISS
+        from langchain_community.vectorstores import FAISS
         from utils import get_openai_embedding_model
         
         file_path = os.path.join(dir_path, filename)
