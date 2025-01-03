@@ -1,5 +1,5 @@
 def check_not_russian_ip(verbose=False):
-    "Checks if current ip is russian and raises an exception"
+    """Checks if current ip is russian and raises an exception."""
     import requests
 
     response = requests.get("https://ifconfig.me")
@@ -20,33 +20,10 @@ def check_not_russian_ip(verbose=False):
 check_not_russian_ip(verbose=True)
 
 
-def get_yagpt_llm(run_test_question=False):
-    import os
-
-    from langchain_community.llms import YandexGPT
+def get_openai_llm(model="gpt-4o-mini", run_test_question=False):
+    """Returns configured OpenAI LLM instance."""
     from langchain.prompts import PromptTemplate
-    from langchain_core.output_parsers import StrOutputParser
-
-    yagpt_llm = YandexGPT(
-        api_key=os.getenv("YANDEXGPT_API_KEY"),
-        folder_id=os.getenv("YANDEXGPT_FOLDER_ID"),
-        model_name='yandexgpt',
-        temperature=0.5
-    )
-
-    if run_test_question:
-        template = "What is the capital of {country}?"
-        prompt = PromptTemplate.from_template(template)
-
-        chain = prompt | yagpt_llm | StrOutputParser()
-        print(chain.invoke({'country': 'Moscow'}))
-
-    return yagpt_llm
-
-
-def get_openai_llm(model='gpt-4o-mini', run_test_question=False):
     from langchain_openai import ChatOpenAI
-    from langchain.prompts import PromptTemplate
 
     check_not_russian_ip(verbose=False)
 
@@ -63,7 +40,8 @@ def get_openai_llm(model='gpt-4o-mini', run_test_question=False):
     return openai_llm
 
 
-def get_openai_embedding_model(model='text-embedding-ada-002'):
+def get_openai_embedding_model(model="text-embedding-ada-002"):
+    """Returns configured OpenAI embeddings model."""
     from langchain_openai.embeddings import OpenAIEmbeddings
 
     check_not_russian_ip(verbose=False)
