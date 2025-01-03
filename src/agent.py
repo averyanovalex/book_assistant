@@ -34,6 +34,8 @@ def create_assistant_chain(path: str):
 
     Question: {question}
     """
+
+    logging.info(f'* Database path: {path}')
     if not os.path.exists(path):
         logging.error(f'* Database not found: {path}')
         return None

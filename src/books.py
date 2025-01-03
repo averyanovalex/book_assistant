@@ -10,7 +10,11 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 def format_book_title(filename):
     """Преобразует имя файла в читаемое название книги"""
     title = os.path.splitext(filename)[0]
-    return title.replace('fdfdf_', ' ')
+    return title.replace('_', ' ')
+
+def format_book_path(book_title):
+    """Преобразует название книги в путь к ней"""
+    return book_title.replace(' ', '_')
 
 def ensure_books_folder(books_folder):
     """Создает папку для книг, если она не существует"""
@@ -34,10 +38,10 @@ def get_all_books(books_folder):
 
 class Book:
     def __init__(self, title):
-        self.raw_title = title
+        self.raw_title = format_book_path(title)
         self.title = format_book_title(title)
         self.id = hash(title)
-        self.path = os.path.join('books', title)
+        self.path = os.path.join('books', self.raw_title)
 
 class BookOperations:
     # Определяем поддерживаемые форматы как атрибут класса
