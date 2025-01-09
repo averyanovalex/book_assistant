@@ -1,35 +1,64 @@
-# Book assistant (prototype)
+# Book Assistant (prototype)
 
-## Идея проекта
+## Project Idea
 
-Ассистент, который может отвечать на вопросы по книге. Это может быть художественная книга, это может быть учебник. Помощник может служить интерактивным конспектом или поможет найти нужную информацию в книге
+An assistant that can answer questions about books. It can work with fiction books, technical books, etc. The assistant can serve as an interactive summary or help find needed information in the book.
 
-__Целевая аудитория__ - студенты, школьники и все-все, кто работает с книгами.
+__Target Audience__ - students and anyone who works with books.
 
+__Main Project Goal__ - to create a prototype assistant for any knowledge base. In this case, the knowledge base is a book. But technically it can be replaced with any wiki, confluence, etc.
 
-__Главная цель проекта для меня__ - сделать прототип ассистента по какой-то базе знаний. В данном случае база знаний - книга. Но технически может быть заменена на любую wiki, confluence и др.
-
-
-## Как это работает (видео)
+## How it Works (video)
 
 [![Book assistant demo](https://img.youtube.com/vi/9ZdERW4Ermo/0.jpg)](https://www.youtube.com/watch?v=9ZdERW4Ermo)
 
-## Работающий прототип
+## Key Features
 
-[http://89.169.166.100:8080](http://89.169.166.100:8080)
+1. New books can be added and are automatically vectorized into RAG
+2. Books can be in different languages, and you can communicate with the assistant in different languages
+3. The assistant struggles with questions that don't have direct answers in the text (area for improvement)
+4. Supports uploading books in txt and pdf formats
 
-если не работает, проверьте, что в браузере указано `http`
+## Installation and Setup
 
+1. Clone the repository:
+```bash
+git clone https://github.com/averyanovalex/book_assistant.git
+cd book-assistant
+```
 
+2. Create and activate virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-## Особенности реализации
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-1. Можно добавлять новые книги, они автоматически векторизуются в RAG
-2. Книги могут быть на разных языках, общаться с ассистентом тоже можно на разных языках
-3. Ассистент плохо отвечает на вопросы, на которые нет прямого ответа в тексте (точка для улучшения)
-4. Поддерживает загрузку книг в txt и pdf форматах.
+4. Create .env file with your OpenAI API key:
+```
+OPENAI_API_KEY=your_api_key_here
 
-## Необходимые библиотеки
+# Optional, if your not use, remove in code
+PROXY_URL=your_proxy_url_here  
+```
+
+5. Initialize sample books (optional):
+```bash
+make init_books
+```
+
+6. Run the application:
+```bash
+make run
+```
+
+The application will be available at http://localhost:8080
+
+## Required Libraries
 
 ```
 langchain==0.3.13
@@ -42,37 +71,28 @@ pypdf==5.1.0
 transliterate==1.10.2
 ```
 
-## Технические особенности:
+## Technical Details
 
-1. Модель `gpt-4o-mini` через прокси
-2. `FAISS` в качестве векторного хранилища
-3. `LangChain` в качестве основного фреймворка
-4. `Flask` в качестве UI
-5. Промтинг с добавлением релеватного контеста из RAG
-6. Память в промтинге не испольуется, сходу не получилось нормально настроить
-
-### Почему Flask вместо StreamLit
-
-Познакомился с сервисами `V0` и `Cursor`. Захотелось сделать  более интересный визуально интерфейс чем позволяет `Streamlit`, даже если сам не умею. Вроде получилось.
-
-Но позже столкнулся, что его чуть сложнее деплоить. Нельзя использовать бесплатный `Streamlit` сервис, надо самому думать об организации различных сессий для разных пользователей и т.д.
+1. Uses `gpt-4o-mini` model via proxy
+2. `FAISS` as vector storage
+3. `LangChain` as the main framework
+4. `Flask` for UI
+5. Prompting with relevant context from RAG
+6. Memory in prompting is not used, couldn't configure it properly initially
 
 
-## Деплой
 
-Развернул в `yandex.cloud`. Просто запустил на linux виртуальной машине. Без дocker, k8s и др. Единственное приобрел прокси, для обращения к openai.
+## Areas for Improvement
 
-## Что можно улучшить
+1. The assistant struggles with questions that don't have direct answers in the book. For example, "What is this book about?" or "What is the main idea of the book?". Therefore, we need to create a large checklist of book questions, get answers using a "smart model" with large context, and put the answers in RAG. Alternatively, use prompting techniques with access to `wikipedia` and internet where these answers likely exist.
 
-1. Помощник плохо отвечает на вопросы, где нет прямых ответов в книге. Например, "О чем эта книга?" или "В чем основная мысль книги?". Поэтому надо составить большой чек-лист вопросов о книге, получить на них ответы использую "умную модель" с большим контекстом и сложить ответы в RAG. Или, как альтернативу, использовать техники промтинга с доступом к `wikipedia` и интернет, где скорее всего есть ответы на эти вопросы.
+2. Add memory when working with the assistant.
 
-2. Добавить память при работе с ассистентом.
+3. Add sessions so each user works with their own books and chat history.
 
-3. Добавить сессии, чтобы каждый пользователь работал со своими книгами и своей историей общения.
+4. Add smarter book splitting. Currently using simple `TextSplitter`.
 
-4. Добавить более умный split по книгам. Сейчас используется простой `TextSplitter`.
+5. Expand supported book formats.
 
-4. Расширить формат поддерживаемых книг
-
-5. Настроить https для сервиса
+6. Set up https for the service.
 
